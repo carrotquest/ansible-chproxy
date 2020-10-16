@@ -1,0 +1,33 @@
+{{ ansible_managed | comment }}
+[Unit]
+Description={{ chproxy.description }}
+Wants=network-online.target
+After=network-online.target
+RequiresMountsFor={{ chproxy.conf_dir }} {{ chproxy.data_dir }}
+
+[Service]
+Type=simple
+LimitNOFILE={{ chproxy.max_open_files | d('65536') }}
+LimitNPROC={{ chproxy.max_threads | d('65536') }}
+
+User={{ chproxy.run_user }}
+EnvironmentFile=-/etc/default/{{ chproxy.name }}
+ExecReload=/bin/kill -SIGHUP $MAINPID
+ExecStart={{ chproxy.bin_dir }}/{{ chproxy.name }} --config {{ chproxy.conf_dir }}/{{ chproxy.config }}
+PermissionsStartOnly=true
+PrivateTmp=true
+WorkingDirectory={{ chproxy.data_dir }}
+
+StandardOutput=journal
+StandardError=inherit
+
+Restart=always
+RestartSec=3
+TimeoutSec=300
+# Disable timeout logic and wait until process is stopped
+TimeoutStopSec=0
+KillSignal=SIGTERM
+KillMode=process
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,16 @@
+---
+- name: restart service
+  systemd:
+    daemon_reload: yes
+    enabled: yes
+    service: "{{ chproxy.name }}.service"
+    state: restarted
+  notify:
+    - reload config
+
+- name: reload config
+  systemd:
+    daemon_reload: yes
+    enabled: yes
+    service: "{{ chproxy.name }}.service"
+    state: reloaded

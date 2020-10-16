@@ -1,0 +1,68 @@
+---
+# tasks file for ansible-chproxy
+- name: chproxy | Create user
+  user:
+    name: "{{ chproxy.run_user }}"
+    shell: /usr/sbin/nologin
+    home: /nonexistent
+    create_home: false
+    state: present
+
+- name: chproxy | Create directories
+  file:
+    path: "{{ item }}"
+    state: directory
+    mode: 0755
+    owner: "{{ chproxy.run_user }}"
+    group: root
+  with_items:
+    - "{{ chproxy.conf_dir }}"
+    - "{{ chproxy.data_dir }}"
+
+- name: chproxy | Check installed
+  stat:
+    path: "{{ chproxy.bin_dir }}/{{ chproxy.name }}"
+  register: chproxy_current_binary
+
+- name: chproxy | Check version
+  shell: |
+    sudo -Hu nobody timeout 2 {{ chproxy.bin_dir }}/{{ chproxy.name }} --version 2>&1 | grep -Eoi '([0-9]{1,}\.){1,3}[0-9]{1,}(|-[a-z0-9\.]{1,})' | sort -urV | head -1
+  args:
+    executable: /bin/bash
+  register: chproxy_current_version
+  changed_when: no
+  when:
+    - chproxy_current_binary.stat.exists
+
+- name: chproxy | Download binary from git
+  unarchive:
+    remote_src: true
+    src: "{{ chproxy.repo }}/releases/download/v{{ chproxy.version }}/{{ chproxy.name }}-{{ chproxy.platform }}-v{{ chproxy.version }}.tar.gz"
+    dest: "{{ chproxy.bin_dir }}"
+    mode: 0755
+    owner: root
+    group: root
+  notify:
+    - reload config
+  when:
+    - not chproxy_current_binary.stat.exists or chproxy_current_version.stdout is version(chproxy.version, '!=')
+
+- name: chproxy | Copy config
+  template:
+    src: "{{ chproxy.config }}.j2"
+    dest: "{{ chproxy.conf_dir }}/{{ chproxy.config }}"
+    mode: 0644
+    owner: root
+  notify:
+    - reload config
+
+- name: chproxy | Copy systemd config
+  template:
+    src: systemd/chproxy.service.j2
+    dest: "/etc/systemd/system/{{ chproxy.name }}.service"
+    backup: false
+    mode: 0644
+    owner: root
+    group: root
+  notify:
+    - restart service
