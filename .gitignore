@@ -1,0 +1,11 @@
+*.retry
+
+*.bak
+*.gho
+*.ori
+*.orig
+*.tmp
+*.log
+
+*/__pycache__
+*.pyc
