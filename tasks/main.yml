@@ -30,7 +30,8 @@
   args:
     executable: /bin/bash
   register: chproxy_current_version
-  changed_when: no
+  changed_when: false
+  check_mode: false
   when:
     - chproxy_current_binary.stat.exists
 
