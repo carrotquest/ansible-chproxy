@@ -5,9 +5,9 @@ chproxy_node: false
 
 chproxy:
   name: 'chproxy'
-  repo: 'https://github.com/Vertamedia/chproxy'
-  version: '1.14.0'
-  platform: 'linux-amd64'
+  repo: 'https://github.com/ContentSquare/chproxy'
+  version: '1.25.0'
+  platform: 'linux_amd64'
   description: 'ClickHouse Proxy Service'
   run_user: 'chproxy'
   bin_dir: '/usr/local/sbin'
@@ -16,6 +16,8 @@ chproxy:
   config: 'config.yml'
   max_open_files: 65536
   max_threads: 65536
+
+chproxy_download_url: "{{ chproxy.repo }}/releases/download/v{{ chproxy.version }}/{{ chproxy.name }}_{{ chproxy.version }}_{{ chproxy.platform }}.tar.gz"
 
 chproxy_bind_address: 0.0.0.0
 chproxy_bind_port: 9090

@@ -38,7 +38,7 @@
 - name: chproxy | Download binary from git
   unarchive:
     remote_src: true
-    src: "{{ chproxy.repo }}/releases/download/v{{ chproxy.version }}/{{ chproxy.name }}-{{ chproxy.platform }}-v{{ chproxy.version }}.tar.gz"
+    src: "{{ chproxy_download_url }}"
     dest: "{{ chproxy.bin_dir }}"
     mode: 0755
     owner: root
