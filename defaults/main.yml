@@ -25,9 +25,12 @@ chproxy_log_debug: true
 
 chproxy_caches:
   - name: "shortterm"
-    dir: "{{ chproxy.data_dir }}/shortterm"
-    max_size: 1Gb
+    mode: "file_system"
+    file_system:
+      dir: "{{ chproxy.data_dir }}/shortterm"
+      max_size: 1Gb
     expire: 160s
+    max_payload_size: 16Mb
 
 chproxy_network_groups:
   - name: "local-net"
